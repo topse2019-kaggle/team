@@ -94,6 +94,24 @@ def transform(resize=224, flip_available=False, train=True, normalize_mean=(0.5,
     # transformの定義一覧
     return transforms.Compose(transform_list)
 
+### simple-transform
+def simple_transform(resize=224):
+    """
+    Simpleなtransform
+    
+    Parameters
+    ----------
+    resize : int
+        画像サイズ
+
+    Returns
+    -------
+    DataSet用のtransform
+    """
+    return transforms.Compose([
+        transforms.Resize((resize, resize)),
+        transforms.ToTensor()
+    ])
 
 ### データローダ
 def DataLoader(train_dataset, test_dataset, batch_size=10, suffle=False, num_workers=2):

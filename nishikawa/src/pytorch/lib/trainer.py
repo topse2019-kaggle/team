@@ -6,7 +6,7 @@ from visdom import Visdom
 import numpy as np
 
 ### 学習
-def train(net, data_loader, criterion, optimizer, epoch_count=10, device="cpu", multiGPU=False):
+def train(net, data_loader, criterion, optimizer, epoch_count=10, device="cpu", multiGPU=False, visdom_port=8076):
     """
     学習済みモデルに対するテストデータを使用した精度の評価
     
@@ -39,7 +39,7 @@ def train(net, data_loader, criterion, optimizer, epoch_count=10, device="cpu", 
         net = torch.nn.DataParallel(net)
     
     # グラフモジュールの初期化
-    viz = Visdom()
+    viz = Visdom(port=visdom_port)
     
     # 指定した回数分学習を行う
     for epoch in range(epoch_count):
