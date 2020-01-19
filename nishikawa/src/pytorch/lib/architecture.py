@@ -67,7 +67,7 @@ class CNN_Architecture():
         if(optimizer is None):
             optimizer = optim.Adam(self.net)
         
-        self.net = trainer.train(self.net, data_loader, criterion, optimizer, epoch_count, device=self.device, multiGPU=True)
+        self.net = trainer.train(self.net, data_loader, criterion, optimizer, epoch_count, device=self.device, multiGPU=False)
     
     # 評価
     def predict(self, test_loader):
