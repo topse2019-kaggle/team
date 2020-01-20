@@ -6,7 +6,7 @@ from visdom import Visdom
 import numpy as np
 
 ### 学習
-def train(net, data_loader, criterion, optimizer, epoch_count=10, device="cpu", multiGPU=False, visdom_port=8076):
+def train(net, data_loader, criterion, optimizer, epoch_count=10, device="cpu", multiGPU=False, visdom_port=8076, is_inception=False):
     """
     学習済みモデルに対するテストデータを使用した精度の評価
     
@@ -72,8 +72,17 @@ def train(net, data_loader, criterion, optimizer, epoch_count=10, device="cpu", 
                 optimizer.zero_grad()
 
                 with torch.set_grad_enabled(phase == 'train'):
-                    outputs = net(inputs)
-                    loss = criterion(outputs, labels)
+                    # inceptionの場合
+                    if is_inception and phase == 'train':
+                        outputs, aux_outputs = net(inputs)
+                        loss1 = criterion(outputs, labels)
+                        loss2 = criterion(aux_outputs, labels)
+                        loss = loss1 + 0.4*loss2
+                    # inception以外の場合
+                    else :
+                        outputs = net(inputs)
+                        loss = criterion(outputs, labels)
+
                     _, preds = torch.max(outputs, 1)
 
                     # 学習モード時の処理

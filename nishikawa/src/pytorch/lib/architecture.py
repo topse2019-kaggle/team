@@ -41,7 +41,7 @@ class CNN_Architecture():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 学習
-    def train(self, data_loader, criterion=None, optimizer=None, epoch_count=10):
+    def train(self, data_loader, criterion=None, optimizer=None, epoch_count=10, is_inception=False):
         """
         学習済みモデルに対するテストデータを使用した精度の評価
 
@@ -55,6 +55,8 @@ class CNN_Architecture():
             最適化関数
         epoch_count : int, default 10
             学習回数
+        is_inception : boolean, default False
+            inceptionネットワークの有無
             
         Returns
         -------
@@ -67,7 +69,7 @@ class CNN_Architecture():
         if(optimizer is None):
             optimizer = optim.Adam(self.net)
         
-        self.net = trainer.train(self.net, data_loader, criterion, optimizer, epoch_count, device=self.device, multiGPU=False)
+        self.net = trainer.train(self.net, data_loader, criterion, optimizer, epoch_count, device=self.device, multiGPU=False, is_inception=is_inception)
     
     # 評価
     def predict(self, test_loader):
