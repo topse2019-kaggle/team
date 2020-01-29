@@ -1,4 +1,4 @@
-◆　hymenoptera_data　ResNet　
+◆　Stanford Dogs Dataset　ResNet　
 【all augmentation】
 --------------------------------------------------------
 cuda
