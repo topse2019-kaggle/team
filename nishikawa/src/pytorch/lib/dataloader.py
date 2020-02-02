@@ -110,7 +110,8 @@ def simple_transform(resize=224):
     """
     return transforms.Compose([
         transforms.Resize((resize, resize)),
-        transforms.ToTensor()
+        transforms.ToTensor(),
+        transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5), inplace=False)
     ])
 
 ### パターン検証用のtransform
