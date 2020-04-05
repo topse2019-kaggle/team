@@ -174,12 +174,12 @@ def pattern_transform(resize=224, HorizontalFlip=True, VerticalFlip=True, Rotati
     # Normalize (mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
     transform_list.append(transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5), inplace=False))
     
-    print(transform_list)
+    #print(transform_list)
     # transformの定義一覧
     return transforms.Compose(transform_list)
 
 ### データローダ
-def DataLoader(train_dataset, test_dataset, batch_size=10, suffle=False, num_workers=2):
+def DataLoader(train_dataset, test_dataset, batch_size=10, shuffle=False, num_workers=2):
     """
     データローダ
     
@@ -194,7 +194,6 @@ def DataLoader(train_dataset, test_dataset, batch_size=10, suffle=False, num_wor
     -------
     DataLoaderのセット(train, val)
     """
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=suffle, num_workers=num_workers)
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=suffle, num_workers=num_workers)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
     return { "train" : train_loader, "val" : test_loader }
-

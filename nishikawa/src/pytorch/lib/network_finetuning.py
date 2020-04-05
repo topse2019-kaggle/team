@@ -23,7 +23,7 @@ def VGG16(class_size):
     #分類するクラス数を指定する
     net.classifier[6] = nn.Linear(in_features=4096, out_features=class_size)
 
-    print(net)
+    #print(net)
 
     for name, param in net.named_parameters():
         param.requires_grad = True
@@ -46,6 +46,33 @@ def ResNet50(class_size):
     """
     use_pretrained = False
     net = models.resnet50(pretrained=use_pretrained)
+
+    #分類するクラス数を指定する
+    net.fc = nn.Linear(in_features=2048, out_features=class_size)
+
+    #print(net)
+
+    for name, param in net.named_parameters():
+        param.requires_grad = True
+
+    return net
+
+### ResNet 152
+def ResNet152(class_size):
+    """
+    ResNet50のネットワーク
+    
+    Parameters
+    ----------
+    class_size : int
+        分類するクラスの数
+
+    Returns
+    -------
+    ResNet50のネットワーク
+    """
+    use_pretrained = False
+    net = models.resnet152(pretrained=use_pretrained)
 
     #分類するクラス数を指定する
     net.fc = nn.Linear(in_features=2048, out_features=class_size)
@@ -82,7 +109,7 @@ def InceptionV3(class_size):
     net.AuxLogits.fc = nn.Linear(768, class_size)
     net.fc = nn.Linear(2048, class_size)
 
-    print(net)
+    #print(net)
 
     for name, param in net.named_parameters():
         param.requires_grad = True
