@@ -41,7 +41,7 @@ class CNN_Architecture():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 学習
-    def train(self, data_loader, criterion=None, optimizer=None, epoch_count=10, is_inception=False):
+    def train(self, data_loader, criterion=None, optimizer=None, epoch_count=10, is_inception=False, multiGPU=False, cuda="cuda:0", visdom_port=8076):
         """
         学習済みモデルに対するテストデータを使用した精度の評価
 
@@ -63,13 +63,16 @@ class CNN_Architecture():
         net : nn.Module
             学習済みのネットワーク    
         """
+        if torch.cuda.is_available() and multiGPU==False:
+            self.device = cuda
+        
         # default値をセット
         if(criterion is None):
             criterion = optim.CrossEntropyLoss()
         if(optimizer is None):
             optimizer = optim.Adam(self.net)
         
-        self.net = trainer.train(self.net, data_loader, criterion, optimizer, epoch_count, device=self.device, multiGPU=False, is_inception=is_inception)
+        self.net = trainer.train(self.net, data_loader, criterion, optimizer, epoch_count, device=self.device, multiGPU=multiGPU, is_inception=is_inception, visdom_port=visdom_port)
     
     # 評価
     def predict(self, test_loader):
