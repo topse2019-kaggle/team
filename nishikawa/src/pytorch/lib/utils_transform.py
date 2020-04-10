@@ -102,7 +102,7 @@ def exclude_perspective():
     return dl.pattern_transform(resize=224, HorizontalFlip=True, VerticalFlip=True, Rotation=True, Perspective=False, Crop=True, Erasing=True)
 
 ### Crop
-def exclude_random_crop():
+def exclude_crop():
     """
     datasetに対するData Augmentation(Crop以外を実施)
 
@@ -114,5 +114,5 @@ def exclude_random_crop():
     datasetに対するData Augmentation(Erasing以外を実施)
 
     """
-def exclude_random_erasing():
+def exclude_erasing():
     return dl.pattern_transform(resize=224, HorizontalFlip=True, VerticalFlip=True, Rotation=True, Perspective=True, Crop=True, Erasing=False)

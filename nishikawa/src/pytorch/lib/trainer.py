@@ -4,9 +4,11 @@ import torch.optim
 import datetime
 from visdom import Visdom
 import numpy as np
+import os
+from . import utils
 
 ### 学習
-def train(net, data_loader, criterion, optimizer, epoch_count=10, device="cpu", multiGPU=False, visdom_port=8076, is_inception=False):
+def train(net, data_loader, criterion, optimizer, epoch_count=10, device="cpu", multiGPU=False, visdom_port=8097, is_inception=False, random_seed=None, save_root=None, save_path=None, test_loader=None):
     """
     学習済みモデルに対するテストデータを使用した精度の評価
     
@@ -24,7 +26,21 @@ def train(net, data_loader, criterion, optimizer, epoch_count=10, device="cpu", 
         学習回数
     device : string default cpu
         学習デバイス(cpu / cuda)
-        
+    multiGPU : boolean, default False
+        複数のGPUを使用する場合, True
+    visdom_port : int, defult 8097
+        visdomで使用するポート番号を指定
+    is_inception : boolean ,default False
+        ネットワークでinception系を使用する場合, True
+    random_seed : int, default None
+        (検証用) 乱数シードの値
+    save_root : string, defualt None
+        (検証用)パラメータ保存先のパス(ルート)
+    save_path : string, defualt None
+        (検証用)パラメータ保存先のパス(ルート以下)
+    test_loader : DataLoader, default None
+        (検証用)テスト用のデータローダ
+    
     Returns
     -------
     net : nn.Module
@@ -40,6 +56,10 @@ def train(net, data_loader, criterion, optimizer, epoch_count=10, device="cpu", 
     
     # グラフモジュールの初期化
     viz = Visdom(port=visdom_port)
+    
+    # epoch_lossの最小値とepoch_accの最大値を保存
+    epoch_loss_min = 100
+    epoch_acc_max = 0
     
     # 指定した回数分学習を行う
     for epoch in range(epoch_count):
@@ -105,8 +125,47 @@ def train(net, data_loader, criterion, optimizer, epoch_count=10, device="cpu", 
             else :
                 viz.line(X=np.array([epoch]), Y=np.array([epoch_loss]), win='train_test', name='test_loss', update='append')
                 viz.line(X=np.array([epoch]), Y=np.array([epoch_acc.item()]), win='train_test', name='test_acc', update='append')
+            
+            if phase == 'val':
+                # 1epochごとに評価
+                if test_loader != None:
+                    predict(net, test_loader, device=device)
+                # 1epochごとにepoch_lossとepoch_accをチェックし、精度が改善されている場合、パラメータを保存する。
+                if save_root != None and save_path != None and random_seed != None:
+                    # 保存先
+                    dir, loss_file, acc_file = utils.get_save_path(save_root, save_path, random_seed)
+
+                    # ディレクトリの作成
+                    os.makedirs(dir, exist_ok=True)
+
+                    # 保存可否フラグ
+                    _save_flg = False
+                    # 各値のチェック
+                    # loss値
+                    if epoch_loss_min > epoch_loss:
+                        epoch_loss_min = epoch_loss
+                        
+                        # 既存ファイルを削除
+                        if os.path.exists(loss_file):
+                            os.remove(loss_file)
+                        # 保存
+                        torch.save(net, loss_file)
+
+                    # acc値
+                    if epoch_acc_max < epoch_acc:
+                        epoch_acc_max = epoch_acc
+                        
+                        # 既存ファイルを削除
+                        if os.path.exists(acc_file):
+                            os.remove(acc_file)
+                        # 保存
+                        torch.save(net, acc_file)
+                        
+                    print("epoch_loss_min: {}".format(epoch_loss_min))
+                    print("epoch_acc_max: {}".format(epoch_acc_max))
         
     print('Finished Training')
+    
     return net
 
 
@@ -142,3 +201,26 @@ def predict(model, test_loader, device="cpu"):
             count_when_correct += (predicted == teacher_labels).sum().item()
 
     print('検証画像に対しての正解率： %d %%' % (100 * count_when_correct / total))
+
+    
+### テストデータを使用した評価(学習済みパラメータあり)
+def __predict_load_param(param_path, test_loader, device="cpu"):
+    """
+    学習済みモデルに対するテストデータを使用した精度の評価
+    学習済みパラメータを使用したモデルを使用する。
+    
+    Parameters
+    ----------
+    param_path : string
+        学習済みパラメータのパス
+    test_loader : DataLoader
+        テストデータを含むDataLoader
+
+    Returns
+    -------
+    (モデルの精度)
+    
+    """
+    net = torch.load(param_path)
+    net.eval()
+    predict(net, test_loader, device)
